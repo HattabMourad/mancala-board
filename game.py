@@ -122,11 +122,15 @@ def main():
 
         elif mode == "computer_vs_computer" or not is_human_turn:
             if is_human_turn:
-                _, move = Play.Minimax(game, "MAX", MINIMAX_DEPTH)
+                _, move = Play.MinimaxAlphaBetaPruning(game, "MAX", ALPHABETA_DEPTH, -float('inf'), float('inf'))
                 game.state.doMove(1, move)
             else:
-                _, move = Play.MinimaxAlphaBetaPruning(game, "MIN", ALPHABETA_DEPTH, -float('inf'), float('inf'))
+                _, move = Play.Minimax(game, "MAX", MINIMAX_DEPTH)
                 game.state.doMove(2, move)
+
+            draw_board(game, highlight_pits=[move])
+            pygame.display.flip()
+            pygame.time.wait(1000)
 
             is_human_turn = not is_human_turn
 
