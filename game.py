@@ -2,6 +2,7 @@ import pygame
 import sys
 from script import MancalaGame, Play
 
+# Constants
 SCREEN_WIDTH, SCREEN_HEIGHT = 800, 400
 PIT_RADIUS = 30
 STORE_WIDTH, STORE_HEIGHT = 60, 120
@@ -78,8 +79,10 @@ def main():
                 if winner == "COMPUTER":
                     if computer1_wins > computer2_wins:
                         result_text = "Computer 1 (Minimax) Wins!"
-                    else:
+                    elif computer2_wins > computer1_wins:
                         result_text = "Computer 2 (Alpha-Beta Pruning) Wins!"
+                    else:
+                        result_text = "It's a Tie!"
                 else:
                     result_text = f"Tie with score {score} seeds."
             else:
@@ -109,7 +112,7 @@ def main():
         elif mode == "computer_vs_computer" or not is_human_turn:
             if mode == "computer_vs_computer":
                 if is_human_turn:
-                    _, move = Play.MinimaxAlphaBetaPruning(game, "COMPUTER", 5, -float('inf'), float('inf'))
+                    _, move = Play.MinimaxAlphaBetaPruning(game, "MAX", 5, -float('inf'), float('inf'))
                     game.state.doMove(1, move)
                     computer1_wins += 1
                 else:
@@ -118,7 +121,7 @@ def main():
                     computer2_wins += 1
                 is_human_turn = not is_human_turn
             else:
-                _, move = Play.MinimaxAlphaBetaPruning(game, "COMPUTER", 5, -float('inf'), float('inf'))
+                _, move = Play.MinimaxAlphaBetaPruning(game, "MAX", 5, -float('inf'), float('inf'))
                 game.state.doMove(2, move)
                 is_human_turn = not mode == "computer_vs_computer"
 
