@@ -112,7 +112,7 @@ def main():
         elif mode == "computer_vs_computer" or not is_human_turn:
             if mode == "computer_vs_computer":
                 if is_human_turn:
-                    _, move = Play.MinimaxAlphaBetaPruning(game, "MAX", 5, -float('inf'), float('inf'))
+                    _, move = Play.Minimax(game, "MAX", 5)
                     game.state.doMove(1, move)
                     computer1_wins += 1
                 else:

@@ -96,7 +96,37 @@ class MancalaGame:
         human_store = self.state.board[self.playerSide["HUMAN"]]
         return computer_store - human_store
 
+
 class Play:
+    @staticmethod
+    def Minimax(game, player, depth):
+        if game.gameOver() or depth == 0:
+            bestValue = game.evaluate()
+            return bestValue, None
+
+        bestPit = None
+
+        if player == "MAX":
+            bestValue = -float('inf')
+            for pit in game.state.possibleMoves(game.playerSide["COMPUTER"]):
+                child_game = copy.deepcopy(game)
+                child_game.state.doMove(game.playerSide["COMPUTER"], pit)
+                value, _ = Play.Minimax(child_game, "MIN", depth - 1)
+                if value > bestValue:
+                    bestValue = value
+                    bestPit = pit
+        else:
+            bestValue = float('inf')
+            for pit in game.state.possibleMoves(game.playerSide["HUMAN"]):
+                child_game = copy.deepcopy(game)
+                child_game.state.doMove(game.playerSide["HUMAN"], pit)
+                value, _ = Play.Minimax(child_game, "MAX", depth - 1)
+                if value < bestValue:
+                    bestValue = value
+                    bestPit = pit
+
+        return bestValue, bestPit
+
     @staticmethod
     def MinimaxAlphaBetaPruning(game, player, depth, alpha, beta):
         if game.gameOver() or depth == 0:
@@ -131,4 +161,3 @@ class Play:
                     break
 
         return bestValue, bestPit
- 
