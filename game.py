@@ -1,6 +1,7 @@
 import pygame
 import sys
 from script import MancalaGame, Play
+import math
 
 SCREEN_WIDTH, SCREEN_HEIGHT = 800, 400
 PIT_RADIUS = 30
@@ -71,8 +72,6 @@ def main():
     game = MancalaGame(player1_side="human" if mode == "human_vs_computer" else "computer")
     is_human_turn = True if mode == "human_vs_computer" else False
 
-    computer1_score = 0
-    computer2_score = 0
     MINIMAX_DEPTH = 5
     ALPHABETA_DEPTH = 5
 
@@ -90,9 +89,9 @@ def main():
                 computer2_score = game.state.board[2]
 
                 if computer1_score > computer2_score:
-                    result_text = f"Computer 1 (Alpha-Beta Pruning) Wins with {computer1_score} seeds!"
+                    result_text = f"Computer 1 Wins with {computer1_score} seeds!"
                 elif computer2_score > computer1_score:
-                    result_text = f"Computer 2 (MinMax) Wins with {computer2_score} seeds!"
+                    result_text = f"Computer 2 Wins with {computer2_score} seeds!"
                 else:
                     result_text = f"It's a Tie! Both scored {computer1_score} seeds."
             else:
@@ -122,10 +121,10 @@ def main():
 
         elif mode == "computer_vs_computer" or not is_human_turn:
             if is_human_turn:
-                _, move = Play.MinimaxAlphaBetaPruning(game, "MAX", ALPHABETA_DEPTH, -float('inf'), float('inf'))
+                _, move = Play.minmaxAlphaBetaPruning(game, 1, 8, -math.inf, math.inf, Play.evaluate)
                 game.state.doMove(1, move)
             else:
-                _, move = Play.Minimax(game, "MAX", MINIMAX_DEPTH)
+                _, move = Play.minmaxAlphaBetaPruning(game, 2, 8, -math.inf, math.inf, Play.evaluate)
                 game.state.doMove(2, move)
 
             draw_board(game, highlight_pits=[move])
@@ -134,7 +133,7 @@ def main():
 
             is_human_turn = not is_human_turn
 
-        clock.tick(30)
+        clock.tick(10)
 
 if __name__ == "__main__":
     main()
