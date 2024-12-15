@@ -1,9 +1,11 @@
+import copy
+
 class MancalaBoard:
     def __init__(self):
         self.board = {
             'A': 4, 'B': 4, 'C': 4, 'D': 4, 'E': 4, 'F': 4,
             'G': 4, 'H': 4, 'I': 4, 'J': 4, 'K': 4, 'L': 4,
-            1: 0, 2:0
+            1: 0, 2: 0
         }
         self.player1_pits = ['A', 'B', 'C', 'D', 'E', 'F']
         self.player2_pits = ['G', 'H', 'I', 'J', 'K', 'L']
@@ -16,40 +18,41 @@ class MancalaBoard:
         }
 
         self.next_pit = {
-            'A': 'B', 'B': 'C', 'C': 'D', 'D': 'E', 'E': 'F', 'F': '1',
-             1: 'L', 'L': 'K', 'K': 'J', 'J': 'I', 'I': 'H', 'H': 'G', 'G': 2,
-             2: 'A'
+            'A': 'B', 'B': 'C', 'C': 'D', 'D': 'E', 'E': 'F', 'F': 1,
+            1: 'L', 'L': 'K', 'K': 'J', 'J': 'I', 'I': 'H', 'H': 'G', 'G': 2,
+            2: 'A'
         }
 
-        def possibleMoves(self, player):
-            if player == 1:
-                return [pit for pit in self.player1_pits if self.board[pit] > 0]
-            elif player == 2:
-                return [pit for pit in self.player2_pits if self.board[pit] > 0]
-            
-        def doMove(self, player, pit):
-            if pit not in self.board or self.board[pit] == 0:
-                raise ValueError("Invalid move: The selected pit is empty or does not exist.")
-            
-            seeds = self.board[pit]
-            self.board[pit] = 0
-            current_pit = pit
+    def possibleMoves(self, player):
+        if player == 1:
+            return [pit for pit in self.player1_pits if self.board[pit] > 0]
+        elif player == 2:
+            return [pit for pit in self.player2_pits if self.board[pit] > 0]
 
-            while seeds > 0:
-                current_pit = self.next_pit[current_pit]
-                if (player == 1 and current_pit == 2) or (player == 2 and current_pit == 1):
-                    continue
-                self.board[current_pit] += 1
-                seeds -= 1
+    def doMove(self, player, pit):
+        if pit not in self.board or self.board[pit] == 0:
+            raise ValueError("Invalid move: The selected pit is empty or does not exist.")
 
-            if current_pit in (self.player1_pits if player == 1 else self.player2_pits) and self.board[current_pit] == 1:
-                opposite_pit = self.opponent_pits[current_pit]
-                if  self.board[opposite_pit] > 0:
-                    self.board[player] += self.board[opposite_pit] + 1
-                    self.board[opposite_pit] = 0
-                    self.board[current_pit] = 0
+        seeds = self.board[pit]
+        self.board[pit] = 0
+        current_pit = pit
 
-            return current_pit == player 
+        while seeds > 0:
+            current_pit = self.next_pit[current_pit]
+            if (player == 1 and current_pit == 2) or (player == 2 and current_pit == 1):
+                continue
+            self.board[current_pit] += 1
+            seeds -= 1
+
+        if current_pit in (self.player1_pits if player == 1 else self.player2_pits) and self.board[current_pit] == 1:
+            opposite_pit = self.opponent_pits[current_pit]
+            if self.board[opposite_pit] > 0:
+                self.board[player] += self.board[opposite_pit] + 1
+                self.board[opposite_pit] = 0
+                self.board[current_pit] = 0
+
+        return current_pit == player
+
     def isGameOver(self):
         return all(self.board[pit] == 0 for pit in self.player1_pits) or all(self.board[pit] == 0 for pit in self.player2_pits)
 
@@ -60,6 +63,7 @@ class MancalaBoard:
         for pit in self.player2_pits:
             self.board[2] += self.board[pit]
             self.board[pit] = 0
+
 
 class MancalaGame:
     def __init__(self, player1_side="human"):
@@ -91,3 +95,40 @@ class MancalaGame:
         computer_store = self.state.board[self.playerSide["COMPUTER"]]
         human_store = self.state.board[self.playerSide["HUMAN"]]
         return computer_store - human_store
+
+class Play:
+    @staticmethod
+    def MinimaxAlphaBetaPruning(game, player, depth, alpha, beta):
+        if game.gameOver() or depth == 0:
+            bestValue = game.evaluate()
+            return bestValue, None
+
+        bestPit = None
+
+        if player == "MAX":
+            bestValue = -float('inf')
+            for pit in game.state.possibleMoves(game.playerSide["COMPUTER"]):
+                child_game = copy.deepcopy(game)
+                child_game.state.doMove(game.playerSide["COMPUTER"], pit)
+                value, _ = Play.MinimaxAlphaBetaPruning(child_game, "MIN", depth - 1, alpha, beta)
+                if value > bestValue:
+                    bestValue = value
+                    bestPit = pit
+                alpha = max(alpha, bestValue)
+                if bestValue >= beta:
+                    break
+        else:
+            bestValue = float('inf')
+            for pit in game.state.possibleMoves(game.playerSide["HUMAN"]):
+                child_game = copy.deepcopy(game)
+                child_game.state.doMove(game.playerSide["HUMAN"], pit)
+                value, _ = Play.MinimaxAlphaBetaPruning(child_game, "MAX", depth - 1, alpha, beta)
+                if value < bestValue:
+                    bestValue = value
+                    bestPit = pit
+                beta = min(beta, bestValue)
+                if bestValue <= alpha:
+                    break
+
+        return bestValue, bestPit
+ 
